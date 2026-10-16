@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bússola da Terapeuta Digital • Flor em Teu Ser</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            clay: {
+              50: '#fdf8f6',
+              100: '#f9eee9',
+              200: '#f4ddd3',
+              300: '#e8beaf',
+              400: '#d99781',
+              500: '#c67357',
+              600: '#b0573c',
+              700: '#92442e',
+              800: '#793928',
+              900: '#643224',
+            },
+            sage: {
+              50: '#f6f8f6',
+              100: '#e9ede9',
+              200: '#d3ded4',
+              300: '#b3c5b5',
+              400: '#8ba68f',
+              500: '#6c8b70',
+              600: '#547058',
+              700: '#435846',
+              800: '#38473a',
+              900: '#2f3b31',
+            },
+            parchment: {
+              50: '#fbfaf8',
+              100: '#f5f3ee',
+              200: '#ebe6dd',
+              300: '#ded5c5',
+            }
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    body {
+      background: radial-gradient(circle at 10% 20%, #fdf8f6 0%, #f8f6f2 50%, #f2eee8 100%);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #2b3330;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-viewport {
+      border: 1px solid rgba(222, 213, 197, 0.75);
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .fade-step-enter {
+      animation: fadeInStep 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeInStep {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.99);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #fbfaf8;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d3ded4;
+      border-radius: 999px;
+    }
+  </style>
+
+  <!-- Import Map Standard do Navegador (ESM) -->
+  <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "lucide-react": "https://esm.sh/lucide-react@0.344.0"
+      }
+    }
+  </script>
+
+  <!-- Babel Standalone para JSX no Browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="min-h-screen py-2 sm:py-6 px-2 sm:px-4 flex items-start justify-center">
+
+  <div id="root" class="w-full max-w-xl"></div>
+
+  <script type="text/babel" data-type="module">
+    import React, { useState, useEffect, useMemo, useRef } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { 
+      Sparkles, 
+      ArrowRight, 
+      ArrowLeft, 
+      RotateCcw, 
+      MessageCircle, 
+      Instagram, 
+      Compass, 
+      Hourglass, 
+      Feather, 
+      Boxes, 
+      HeartHandshake, 
+      CheckCircle2, 
+      ShieldAlert, 
+      Layers,
+      Sparkle,
+      Home,
+      Activity,
+      BookOpen,
+      HelpCircle,
+      Check,
+      Clock,
+      SlidersHorizontal,
+      Eye,
+      X
+    } from 'lucide-react';
+
+    // 6 Perguntas Profundas e Estratégicas para Diagnosticar o Momento Terapêutico
+    const diagnosticQuestions = [
+      {
+        id: 'sustentacao',
+        stepNumber: 1,
+        stageTitle: 'Etapa 1 de 6 • Seu Modelo de Renda Atual',
+        headline: 'Hoje, como é gerada a maior parte do sustento do seu trabalho?',
+        subtitle: 'Olhe com sinceridade para o formato que sustenta seu mês:',
+        options: [
+          {
+            id: 'refem_1a1',
+            icon: '⏳',
+            title: '100% dependente da sessão individual (presencial ou online)',
+            desc: 'Se atendo, recebo. Se viajo, descanso ou fico doente, a renda para no mesmo dia.'
+          },
+          {
+            id: 'ideias_gaveta',
+            icon: '📦',
+            title: 'Tenho rascunhos de cursos ou oficinas, mas continuam parados na gaveta',
+            desc: 'A energia da rotina de atender drena meu tempo para estruturar outros formatos com calma.'
+          },
+          {
+            id: 'esteira_desejada',
+            icon: '🌱',
+            title: 'Já atendo com consistência e sinto o chamado claro para ir além da sessão',
+            desc: 'Quero empacotar meu conhecimento em produtos acessíveis, grupos ou materiais autoguiados.'
+          }
+        ]
+      },
+      {
+        id: 'esgotamento_corpo',
+        stepNumber: 2,
+        stageTitle: 'Etapa 2 de 6 • Seu Corpo e Sua Energia Vital',
+        headline: 'Ao final de uma semana cheia de atendimentos, como você costuma se sentir?',
+        subtitle: 'O corpo é a bússola mais sincera sobre o teto do seu modelo:',
+        options: [
+          {
+            id: 'exaustao_emocional',
+            icon: '🛋️',
+            title: 'Sobrecarga mental e sensação de estar no limite do cansaço',
+            desc: 'Sinto que estou doando toda a minha vitalidade para os outros e não sobra nada para nutrir meu próprio negócio.'
+          },
+          {
+            id: 'frustracao_tempo',
+            icon: '⌛',
+            title: 'Amo atender, mas sinto frustração por não ter tempo de estudar e criar',
+            desc: 'Fico com a sensação constante de apagar incêndios e nunca desenvolver novos saberes ou vivências.'
+          },
+          {
+            id: 'presenca_seletiva',
+            icon: '🕊️',
+            title: 'Quero selecionar menos pessoas para o 1:1 e atender com profundidade máxima',
+            desc: 'Quero ter o luxo de atender menos clientes por um valor mais justo, sem medo de faltar dinheiro no fim do mês.'
+          }
+        ]
+      },
+      {
+        id: 'repeticao_saberes',
+        stepNumber: 3,
+        stageTitle: 'Etapa 3 de 6 • Aquilo que se Repete no Consultório',
+        headline: 'Você já reparou em temas e orientações que você repete para quase todo interagente?',
+        subtitle: 'Todo terapeuta experiente tem um "método invisível" que se repete:',
+        options: [
+          {
+            id: 'repeticao_pura',
+            icon: '🗣️',
+            title: 'Sim! Passo 30% a 40% da sessão repetindo as mesmas orientações básicas',
+            desc: 'Exercícios de respiração, rituais matinais, manejo de crise ou perguntas de reflexão que todo mundo precisa.'
+          },
+          {
+            id: 'tudo_intuitivo',
+            icon: '💭',
+            title: 'Sinto que tudo é muito intuitivo e tenho dificuldade de separar o que é método',
+            desc: 'Acredito que meu valor está só na minha presença ao vivo e acho difícil descolar meu conhecimento do improviso.'
+          },
+          {
+            id: 'pronto_para_embalar',
+            icon: '✨',
+            title: 'Já tenho clareza dos meus pilares e só me falta estruturar em um formato leve',
+            desc: 'Sei exatamente a jornada que meus clientes precisam, mas preciso de um método rápido para empacotar.'
+          }
+        ]
+      },
+      {
+        id: 'gargalo_criativo',
+        stepNumber: 4,
+        stageTitle: 'Etapa 4 de 6 • O Maior Gargalo Criativo',
+        headline: 'O que mais te paralisa na hora de tentar criar algo além da sessão individual?',
+        subtitle: 'Seja um guia digital, uma oficina de 2 horas ou uma mentoria em grupo:',
+        options: [
+          {
+            id: 'tempo_estruturacao',
+            icon: '🧠',
+            title: 'A sensação de que levarei semanas montando e organizando',
+            desc: 'Fazer ementa, produzir lâminas, pensar em didática e materiais me cansa antes mesmo de começar.'
+          },
+          {
+            id: 'medo_frieza',
+            icon: '🛡️',
+            title: 'Medo de criar algo que soe comercial, frio ou apelativo',
+            desc: 'Tenho aversão a fórmulas prontas de marketing barulhento que desrespeitam o sagrado da escuta terapêutica.'
+          },
+          {
+            id: 'falta_ferramenta',
+            icon: '🎯',
+            title: 'Não sei como organizar múltiplos formatos sem me perder em ferramentas complexas',
+            desc: 'Plataformas, automações e formatos técnicos me parecem um mundo distante e pesado.'
+          }
+        ]
+      },
+      {
+        id: 'visao_ia',
+        stepNumber: 5,
+        stageTitle: 'Etapa 5 de 6 • Sua Relação com a Inteligência Artificial',
+        headline: 'Como a IA tem entrado no seu imaginário profissional até agora?',
+        subtitle: 'Queremos entender o seu olhar sobre essa ferramenta:',
+        options: [
+          {
+            id: 'apenas_posts',
+            icon: '📱',
+            title: 'Achei que IA servisse só para sugerir legendas no Instagram',
+            desc: 'Nunca tinha pensado nela como uma co-criadora para desenhar oficinas, esteiras de valor e rituais digitais.'
+          },
+          {
+            id: 'tentou_sem_alma',
+            icon: '🤖',
+            title: 'Já tentei usar o ChatGPT, mas achei genérico e desalmado',
+            desc: 'As respostas pareciam textos enlatados de autoajuda que não transmitem o cuidado que tenho com o outro.'
+          },
+          {
+            id: 'copiloto',
+            icon: '✨',
+            title: 'Percebo a IA como um "Segundo Cérebro" para aliviar meu operacional',
+            desc: 'Quero aprender comandos conscientes para acelerar a estrutura e preservar meu tempo para o afeto.'
+          }
+        ]
+      },
+      {
+        id: 'visao_futuro',
+        stepNumber: 6,
+        stageTitle: 'Etapa 6 de 6 • O Seu Cenário Ideal de Realização',
+        headline: 'Qual vitória traria mais paz de espírito para o seu negócio nos próximos meses?',
+        subtitle: 'Escolha a frase que faz o seu coração respirar aliviado:',
+        options: [
+          {
+            id: 'renda_independente',
+            icon: '🕊️',
+            title: 'Ter uma renda que não dependa 100% de estar sentada atendendo',
+            desc: 'Vender materiais e produtos acessíveis enquanto descanso ou estudo, atendendo menos clientes no 1:1 com mais presença.'
+          },
+          {
+            id: 'escala_afeto',
+            icon: '🪴',
+            title: 'Cuidar de mais pessoas simultaneamente através de grupos leves',
+            desc: 'Democratizar o acesso aos meus saberes sem precisar multiplicar minhas horas de atendimento individual.'
+          },
+          {
+            id: 'esteira_viva',
+            icon: '🌸',
+            title: 'Um ecossistema acolhedor onde cada interagente encontra o formato ideal',
+            desc: 'Quem não pode pagar o 1:1 consome meus materiais leves; quem quer profundidade máxima contrata a sessão individual.'
+          }
+        ]
+      }
+    ];
+    const archetypesConfig = {
+      prisioneira_relogio: {
+        tag: 'Seu Diagnóstico Atual',
+        title: 'A Terapeuta Prisioneira do Relógio 1:1',
+        archetypeBadge: 'Fase: Descompressão Urgente da Agenda',
+        colorTheme: 'clay',
+        icon: Hourglass,
+        resumo: 'Você tem uma prática profunda, sensível e respeitada, mas o seu modelo de sustento ainda está 100% amarrado à venda da sua hora presente.',
+        diagnosticoProfundo: 'Seu teto de faturamento é exatamente o seu limite biológico de cansaço. Estar no digital hoje, para você, apenas transferiu o atendimento da poltrona para a frente da webcam. Se você parar de atender por 2 semanas, o negócio congela.',
+        pontoCego: 'Acreditar que "expandir" exige lotar ainda mais a agenda ou postar todos os dias no Instagram. Na verdade, seu próximo passo é desacoplar a entrega de valor da sua presença ao vivo contínua.',
+        ondeIaDestrava: 'A IA entra como a sua "Arquiteta de Formatos Leves". Em vez de levar meses para estruturar um produto, você usa comandos com alma para transformar aquilo que você repete em toda sessão (um ritual de descompressão, um guia de sono, um mapa emocional) em um produto de entrada acessível (R$ 37 a R$ 97) em uma única tarde.',
+        planoDe3Passos: [
+          { step: '01', title: 'Mapeamento de Padrões', desc: 'Identificar com auxílio da IA as 3 queixas mais comuns que seus interagentes trazem.' },
+          { step: '02', title: 'Criação do Produto Semente', desc: 'Estruturar um guia prático, meditações ou mini-oficina autoguiada sem precisar gravar horas de vídeo.' },
+          { step: '03', title: 'Ponto de Contato Leve', desc: 'Oferecer esse material para quem chega no seu direct ou não tem condições de investir na sua sessão individual.' }
+        ]
+      },
+      guardia_gaveta: {
+        tag: 'Seu Diagnóstico Atual',
+        title: 'A Guardiã de Saberes Engavetados',
+        archetypeBadge: 'Fase: Estruturação & Fluidez Didática',
+        colorTheme: 'sage',
+        icon: Boxes,
+        resumo: 'Você transborda formações, cadernos cheios de anotações e ideias lindas de vivências, mas paralisa na hora de traduzir tudo isso em um formato tangível.',
+        diagnosticoProfundo: 'O excesso de profundidade e a autocrítica alta geram uma paralisia silenciosa. Você acha que precisa de semanas livres, câmeras caras ou uma equipe inteira de marketing para lançar uma oficina ou grupo.',
+        pontoCego: 'Esperar "tempo sobrar" ou "tudo estar perfeito" para tirar uma ideia da gaveta. O tempo nunca vai sobrar enquanto o 1:1 consumir toda a sua energia da semana.',
+        ondeIaDestrava: 'A IA atua como uma coprodutora empática e incansável. Você pode ditar suas ideias em áudio ou jogar seus rascunhos desordenados, e a IA organiza em ementas lógicas, lâminas de apresentação, exercícios práticos e roteiros acolhedores em poucos minutos, mantendo a sua voz autêntica.',
+        planoDe3Passos: [
+          { step: '01', title: 'Curadoria de Saberes', desc: 'Alimentar a IA com seus rascunhos e deixar que ela organize a jornada em módulos acolhedores.' },
+          { step: '02', title: 'Oficina Rápida de 2 Horas', desc: 'Montar um encontro temático ao vivo para validar o tema antes de criar um curso longo.' },
+          { step: '03', title: 'Reciclagem Inteligente', desc: 'Transformar a gravação dessa vivência em um ativo perpétuo que gera sustento contínuo.' }
+        ]
+      },
+      arquiteta_ecossistema: {
+        tag: 'Seu Diagnóstico Atual',
+        title: 'A Arquiteta de Ecossistemas com Alma',
+        archetypeBadge: 'Fase: Alquimia & Escala com Afeto',
+        colorTheme: 'clay',
+        icon: Feather,
+        resumo: 'Você já entendeu que a sessão 1:1 é apenas um dos braços do seu impacto e está madura para orquestrar uma esteira completa de serviços terapêuticos.',
+        diagnosticoProfundo: 'Você não tem medo do digital e já valoriza o seu tempo, mas precisa de um método ético para criar múltiplos pontos de acolhimento (produtos acessíveis, mentorias em grupo, diagnósticos interativos e atendimento VIP) sem se tornar refém de ferramentas complexas.',
+        pontoCego: 'Tentar construir tudo artesanalmente ou cair na tentação de usar fórmulas de marketing agressivo que afastam o público qualificado e sensível.',
+        ondeIaDestrava: 'Você está no momento exato de usar a IA no nível estratégico: automações acolhedoras, mini-apps de diagnóstico como este, onboarding empático para interagentes e esteiras de serviços onde ninguém fica de fora.',
+        planoDe3Passos: [
+          { step: '01', title: 'Esteira Viva de 3 Níveis', desc: 'Produto de entrada acessível (R$ 47), Grupo/Oficina intermediária e Sessão 1:1 de Alto Valor.' },
+          { step: '02', title: 'IA como Guardiã do Operacional', desc: 'Automatizar resumos de sessão, lembretes carinhosos e materiais de apoio com prompts calibrados.' },
+          { step: '03', title: 'Posicionamento Magnético', desc: 'Comunicação orientada à transformação, sem apelo comercial agressivo.' }
+        ]
+      }
+    };
+
+    function App() {
+      // Navegação em estilo Mini-App: 'intro' | 'quiz' | 'result' | 'guide'
+      const [stage, setStage] = useState('intro');
+      const [currentQIndex, setCurrentQIndex] = useState(0);
+      const [answers, setAnswers] = useState({});
+      const [calculatedArchetypeKey, setCalculatedArchetypeKey] = useState('prisioneira_relogio');
+      const [copiedText, setCopiedText] = useState(false);
+      const appTopRef = useRef(null);
+
+      // Seu número de WhatsApp oficial configurado
+      const WHATSAPP_PHONE = '5511945774966'; 
+
+      // Função utilitária para rolar suavemente para o topo do aplicativo
+      const scrollToTop = () => {
+        if (appTopRef.current) {
+          appTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      };
+
+      // Sempre que mudar de pergunta ou de estágio, rola para o topo
+      useEffect(() => {
+        scrollToTop();
+      }, [stage, currentQIndex]);
+
+      // Carregar histórico local
+      useEffect(() => {
+        try {
+          const saved = localStorage.getItem('bussola_terapeuta_save_v2');
+          if (saved) {
+            const data = JSON.parse(saved);
+            if (data.answers && Object.keys(data.answers).length >= 4) {
+              setAnswers(data.answers);
+              setCalculatedArchetypeKey(data.archetypeKey || 'prisioneira_relogio');
+            }
+          }
+        } catch (e) {
+          console.warn('Storage indisponível');
+        }
+      }, []);
+
+      const saveProgress = (ans, archKey) => {
+        try {
+          localStorage.setItem('bussola_terapeuta_save_v2', JSON.stringify({
+            answers: ans,
+            archetypeKey: archKey,
+            updatedAt: new Date().toISOString()
+          }));
+        } catch (e) {}
+      };
+
+      const handleSelectOption = (questionId, optionId) => {
+        const nextAnswers = { ...answers, [questionId]: optionId };
+        setAnswers(nextAnswers);
+
+        if (currentQIndex < diagnosticQuestions.length - 1) {
+          setCurrentQIndex(prev => prev + 1);
+        } else {
+          const finalArchetype = evaluateArchetype(nextAnswers);
+          setCalculatedArchetypeKey(finalArchetype);
+          saveProgress(nextAnswers, finalArchetype);
+          setStage('result');
+        }
+        scrollToTop();
+      };
+
+      const handlePreviousQuestion = () => {
+        if (currentQIndex > 0) {
+          setCurrentQIndex(prev => prev - 1);
+        } else {
+          setStage('intro');
+        }
+        scrollToTop();
+      };
+
+      const handleRestart = () => {
+        setAnswers({});
+        setCurrentQIndex(0);
+        setStage('intro');
+        scrollToTop();
+        try {
+          localStorage.removeItem('bussola_terapeuta_save_v2');
+        } catch (e) {}
+      };
+
+      // Avaliação Refinada com 6 Variáveis
+      const evaluateArchetype = (ans) => {
+        const r1 = ans['sustentacao'];
+        const r2 = ans['esgotamento_corpo'];
+        const r3 = ans['repeticao_saberes'];
+        const r4 = ans['gargalo_criativo'];
+        const r5 = ans['visao_ia'];
+        const r6 = ans['visao_futuro'];
+
+        if (r1 === 'refem_1a1' && (r2 === 'exaustao_emocional' || r6 === 'renda_independente')) {
+          return 'prisioneira_relogio';
+        }
+        if (r1 === 'ideias_gaveta' || r4 === 'tempo_estruturacao' || r3 === 'tudo_intuitivo') {
+          return 'guardia_gaveta';
+        }
+        return 'arquiteta_ecossistema';
+      };
+
+      const activeArchetype = useMemo(() => {
+        return archetypesConfig[calculatedArchetypeKey] || archetypesConfig.prisioneira_relogio;
+      }, [calculatedArchetypeKey]);
+
+      const currentQuestion = diagnosticQuestions[currentQIndex];
+      const progressPercent = Math.round(((currentQIndex + 1) / diagnosticQuestions.length) * 100);
+
+      // Disparador de WhatsApp ultra-compatível com Mobile & Web
+      const handleOpenWhatsapp = (e) => {
+        if (e) e.preventDefault();
+        
+        const messageText = `Olá! 🌸 Vim através do mini-app "Bússola da Terapeuta Digital" no Flor em Teu Ser.
+
+Acabei de concluir meu diagnóstico e o meu momento atual deu:
+👉 *${activeArchetype.title}*
+
+Senti muito chamado pelo que você compartilhou sobre ir além do 1:1 com IA e gostaria de conversar sobre o meu próximo passo!`;
+
+        const encodedMsg = encodeURIComponent(messageText);
+
+        const targetUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodedMsg}`;
+
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+          window.location.href = targetUrl;
+        } else {
+          window.open(targetUrl, '_blank', 'noopener,noreferrer');
+        }
+      };
+
+      // Copiar texto para Instagram Direct
+      const getInstagramDirectText = () => {
+        return `Olá! 🌸 Fiz a Bússola no Flor em Teu Ser e meu resultado deu: "${activeArchetype.title}". Adoraria te contar sobre o meu momento e entender como ir além do 1:1!`;
+      };
+
+      const copyInstagramText = () => {
+        const text = getInstagramDirectText();
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        try {
+          document.execCommand('copy');
+          setCopiedText(true);
+          setTimeout(() => setCopiedText(false), 3000);
+        } catch (err) {}
+        document.body.removeChild(el);
+      };
+
+      return (
+        <div ref={appTopRef} className="w-full flex flex-col min-h-[92vh] sm:min-h-[88vh] justify-between">
+          
+          {/* Card Principal em Formato App Nativo */}
+          <div className="app-viewport rounded-[2.2rem] shadow-2xl shadow-clay-900/10 p-5 sm:p-7 transition-all flex-1 pb-24 relative overflow-hidden">
+
+            {/* Top Bar do App */}
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-parchment-200/70 text-slate-500">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium tracking-wide">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Mini-App de Boas-Vindas</span>
+              </div>
+              <div className="text-[11px] font-mono text-clay-700 bg-clay-50 px-2.5 py-0.5 rounded-full border border-clay-200/60 font-semibold">
+                Flor em Teu Ser
+              </div>
+            </div>
+
+            {/* Cabeçalho de Marca */}
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-clay-100/70 text-clay-800 text-[11px] font-semibold tracking-wide border border-clay-200/50">
+                <Compass className="w-3.5 h-3.5 text-clay-600" />
+                <span>Flor em Teu Ser • Bússola de Expansão</span>
+              </div>
+            </div>
+
+            {/* BANNER COM FOTOGRAFIA REALISTA & ACOLHEDORA */}
+            <div className="mt-3.5 mb-5 rounded-2xl overflow-hidden relative shadow-sm border border-parchment-200/90 group">
+              <div className="h-36 sm:h-44 w-full relative flex items-center justify-between overflow-hidden bg-parchment-200">
+                <img 
+                  src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=1200&q=80" 
+                  alt="Espaço terapêutico acolhedor com luz natural, plantas e aconchego"
+                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                  onError={(e) => {
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=1200&q=80";
+                  }}
+                />
+
+                <div className="absolute inset-0 bg-gradient-to-r from-stone-900/85 via-stone-900/65 to-transparent sm:to-stone-900/20 backdrop-blur-[0.5px]"></div>
+
+                <div className="relative z-10 px-5 sm:px-7 max-w-[280px] sm:max-w-sm text-left text-white">
+                  <span className="inline-block text-[10px] uppercase font-bold tracking-widest text-emerald-200 bg-stone-900/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/15 mb-1.5">
+                    Além da Troca de Horas
+                  </span>
+                  <h2 className="text-sm sm:text-base font-serif font-medium text-white leading-snug drop-shadow-sm">
+                    Sua sabedoria merece florescer em novos formatos.
+                  </h2>
+                  <p className="text-[11px] text-stone-200/90 mt-1 leading-relaxed hidden sm:block">
+                    Sem exaustão biológica. Sem fórmulas frias. Com presença e apoio da IA.
+                  </p>
+                </div>
+
+                <div className="absolute right-3.5 bottom-3 z-10 hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-900/60 backdrop-blur-md border border-white/10 text-[10px] text-stone-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  <span>Espaço de Cura & Expansão</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ETAPA 1: TELA INICIAL (BOAS-VINDAS) */}
+            {stage === 'intro' && (
+              <div className="space-y-4 fade-step-enter">
+                <div className="text-center space-y-2">
+                  <h1 className="text-xl sm:text-2xl font-serif font-bold text-slate-800 leading-snug">
+                    E se expandir não significasse atender mais horas no 1:1 até a exaustão?
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                    Muitas terapeutas já atendem no presencial ou no digital, mas continuam <strong>reféns do relógio e da troca de tempo por dinheiro</strong>. Descubra como a Inteligência Artificial ética destrava novos formatos com alma.
+                  </p>
+                </div>
+
+                {/* 3 Cartões Rápidos do Mini-App */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                  <div className="p-3 bg-white rounded-xl border border-parchment-200 flex items-center gap-2.5 shadow-xs">
+                    <span className="text-base">⏳</span>
+                    <div className="text-[11px] text-slate-700 font-medium">Fim do teto biológico da sessão</div>
+                  </div>
+                  <div className="p-3 bg-white rounded-xl border border-parchment-200 flex items-center gap-2.5 shadow-xs">
+                    <span className="text-base">🌿</span>
+                    <div className="text-[11px] text-slate-700 font-medium">Saberes empacotados em produtos</div>
+                  </div>
+                  <div className="p-3 bg-white rounded-xl border border-parchment-200 flex items-center gap-2.5 shadow-xs">
+                    <span className="text-base">✨</span>
+                    <div className="text-[11px] text-slate-700 font-medium">IA como co-criadora empática</div>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-sage-50/70 border border-sage-200/70 text-center text-xs text-sage-900 leading-relaxed">
+                  <strong>6 Perguntas Guiadas de Reflexão:</strong> Responda com honestidade para diagnosticar seu momento exato e receber um roteiro de descompressão do 1:1.
+                </div>
+
+                <button
+                  onClick={() => setStage('quiz')}
+                  className="w-full py-3.5 px-5 rounded-2xl bg-clay-600 hover:bg-clay-700 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-clay-600/20 transition-all duration-300 hover:scale-[1.01] active:scale-95"
+                >
+                  Iniciar Diagnóstico do Meu Momento <ArrowRight className="w-4 h-4" />
+                </button>
+
+                {answers['sustentacao'] && (
+                  <div className="text-center pt-1">
+                    <button
+                      onClick={() => setStage('result')}
+                      className="text-xs text-clay-700 hover:text-clay-900 underline font-medium"
+                    >
+                      Acessar meu último resultado salvo
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ETAPA 2: O QUIZ DE 6 PERGUNTAS */}
+            {stage === 'quiz' && (
+              <div className="space-y-4 fade-step-enter">
+                
+                {/* Indicador de Progresso do Mini-App */}
+                <div className="space-y-1.5 pb-1">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600">
+                    <span className="text-sage-800 bg-sage-100/80 px-2.5 py-0.5 rounded-md">
+                      {currentQuestion.stageTitle}
+                    </span>
+                    <span className="font-mono text-clay-700 font-bold">
+                      {progressPercent}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-parchment-200 h-1.5 rounded-full overflow-hidden">
+                    <div 
+                      className="bg-clay-500 h-full rounded-full transition-all duration-300 ease-out"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Título da Pergunta Atual */}
+                <div className="space-y-1">
+                  <h2 className="text-base sm:text-lg font-serif font-semibold text-slate-900 leading-snug">
+                    {currentQuestion.headline}
+                  </h2>
+                  <p className="text-[11px] sm:text-xs text-slate-500">
+                    {currentQuestion.subtitle}
+                  </p>
+                </div>
+
+                {/* Lista de Opções Clicáveis */}
+                <div className="space-y-2 pt-1">
+                  {currentQuestion.options.map((option) => {
+                    const isSelected = answers[currentQuestion.id] === option.id;
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => handleSelectOption(currentQuestion.id, option.id)}
+                        className={`w-full p-3.5 rounded-2xl border text-left transition-all duration-200 group flex items-start gap-3 ${
+                          isSelected
+                            ? 'border-clay-500 bg-clay-50/90 shadow-xs'
+                            : 'border-parchment-200 bg-white hover:border-clay-300 hover:bg-clay-50/30'
+                        }`}
+                      >
+                        <span className="text-xl shrink-0 p-1 bg-parchment-100 rounded-xl group-hover:scale-105 transition-transform">
+                          {option.icon}
+                        </span>
+                        <div className="flex-1">
+                          <h4 className="text-xs sm:text-sm font-semibold text-slate-800 group-hover:text-clay-800 transition-colors">
+                            {option.title}
+                          </h4>
+                          <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                            {option.desc}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Botão de Retorno de Pergunta */}
+                <div className="flex items-center justify-between pt-2 border-t border-parchment-200/60">
+                  <button
+                    onClick={handlePreviousQuestion}
+                    className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 font-medium px-2.5 py-1.5 rounded-lg hover:bg-parchment-100 transition-colors"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" /> Voltar anterior
+                  </button>
+                  <span className="text-[11px] text-slate-400">
+                    Passo {currentQIndex + 1} de {diagnosticQuestions.length}
+                  </span>
+                </div>
+
+              </div>
+            )}
+
+            {/* ETAPA 3: RESULTADO & CONEXÃO (WHATSAPP E DIRECT) */}
+            {stage === 'result' && (
+              <div className="space-y-4 fade-step-enter">
+                
+                {/* Cartão do Arquétipo */}
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-white via-clay-50/70 to-parchment-100/50 border-2 border-clay-200 shadow-sm relative overflow-hidden">
+                  <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-clay-200/60">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-clay-700 bg-clay-100 px-2.5 py-0.5 rounded-full">
+                      {activeArchetype.archetypeBadge}
+                    </span>
+                    <span className="text-[11px] font-medium text-slate-500">
+                      Diagnóstico Concluído
+                    </span>
+                  </div>
+
+                  <div className="pt-3 space-y-1.5">
+                    <h2 className="text-lg sm:text-xl font-serif font-bold text-slate-900 leading-snug">
+                      {activeArchetype.title}
+                    </h2>
+                    <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                      {activeArchetype.resumo}
+                    </p>
+                  </div>
+                </div>
+
+                {/* O Ponto Cego */}
+                <div className="p-4 rounded-xl bg-amber-50/80 border border-amber-200/80 space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-amber-900 text-xs font-bold uppercase tracking-wider">
+                    <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>Seu Maior Ponto Cego Hoje</span>
+                  </div>
+                  <p className="text-xs text-amber-900/90 leading-relaxed">
+                    {activeArchetype.pontoCego}
+                  </p>
+                </div>
+
+                {/* Como a IA Desbloqueia */}
+                <div className="p-4 rounded-xl bg-sage-50/90 border border-sage-200 space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-sage-900 text-xs font-bold uppercase tracking-wider">
+                    <Sparkles className="w-4 h-4 text-sage-600 shrink-0" />
+                    <span>A Chave de Alquimia com IA para Você</span>
+                  </div>
+                  <p className="text-xs text-slate-700 leading-relaxed">
+                    {activeArchetype.ondeIaDestrava}
+                  </p>
+                </div>
+
+                {/* Roteiro Prático de 3 Passos */}
+                <div className="p-4 rounded-xl bg-white border border-parchment-200 space-y-2.5 shadow-xs">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5 text-clay-600" />
+                    <span>Roteiro de Descompressão Recomendado:</span>
+                  </h3>
+
+                  <div className="space-y-2">
+                    {activeArchetype.planoDe3Passos.map((item, idx) => (
+                      <div key={idx} className="p-2.5 rounded-lg bg-parchment-50 border border-parchment-200 flex items-start gap-2.5">
+                        <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-clay-100 text-clay-800 shrink-0">
+                          {item.step}
+                        </span>
+                        <div>
+                          <h4 className="text-xs font-semibold text-slate-800">{item.title}</h4>
+                          <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* CAIXA DE ACOLHIMENTO: WHATSAPP OU DIRECT */}
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-clay-50/90 via-white to-parchment-100 border border-clay-200 text-center space-y-3 shadow-sm">
+                  <div className="inline-block px-2.5 py-0.5 rounded-full bg-clay-100 text-clay-700 font-bold text-[10px] uppercase tracking-wider">
+                    🌸 Próximo Passo • Conversa Direta
+                  </div>
+
+                  <div className="space-y-1 max-w-sm mx-auto">
+                    <h3 className="text-sm sm:text-base font-serif font-bold text-slate-900">
+                      Quer me contar o seu resultado e pensar no próximo passo?
+                    </h3>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      Adorarei te ouvir de forma personalizada. Me envie uma mensagem contando seu diagnóstico para pensarmos no formato ideal para o seu momento.
+                    </p>
+                  </div>
+
+                  {/* Botões de Contato */}
+                  <div className="pt-1 flex flex-col sm:flex-row gap-2.5 justify-center items-center">
+                    
+                    {/* Botão WhatsApp Robusto e Compatível com Mobile */}
+                    <button
+                      type="button"
+                      onClick={handleOpenWhatsapp}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <span>Falar no WhatsApp com meu resultado</span>
+                    </button>
+
+                    {/* Botão Instagram Direct */}
+                    <a
+                      href="https://instagram.com/floremteuser" 
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={copyInstagramText}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-rose-500 hover:opacity-95 text-white text-xs font-semibold shadow-md shadow-pink-500/15 transition-all hover:scale-[1.02] active:scale-95"
+                    >
+                      <Instagram className="w-4 h-4" />
+                      <span>{copiedText ? 'Texto Copiado! Abrindo @floremteuser' : 'Falar no Direct (@floremteuser)'}</span>
+                    </a>
+
+                  </div>
+
+                  {copiedText && (
+                    <p className="text-[11px] text-emerald-700 bg-emerald-50 py-1 px-3 rounded-lg border border-emerald-200 inline-block font-medium fade-step-enter">
+                      ✓ Mensagem copiada com sucesso! Ao abrir o Instagram, basta colar na DM.
+                    </p>
+                  )}
+
+                  <div className="pt-1">
+                    <button
+                      onClick={handleRestart}
+                      className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-800 font-medium py-1 px-2.5 rounded-lg hover:bg-white transition-colors"
+                    >
+                      <RotateCcw className="w-3 h-3" /> Refazer diagnóstico do zero
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+          </div>
+
+          {/* BARRA DE NAVEGAÇÃO ESTILO MINI-APP FIXA NO RODAPÉ */}
+          <nav className="sticky bottom-2 mt-2 w-full max-w-xl mx-auto rounded-2xl bg-white/95 backdrop-blur-md border border-parchment-200 shadow-lg shadow-slate-900/5 p-2 flex items-center justify-around z-30">
+            <button
+              onClick={() => setStage('intro')}
+              className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all text-[10px] font-medium ${
+                stage === 'intro' ? 'text-clay-700 font-bold bg-clay-50' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Home className="w-4 h-4" />
+              <span>Início</span>
+            </button>
+
+            <button
+              onClick={() => {
+                if (stage === 'intro') setStage('quiz');
+              }}
+              className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all text-[10px] font-medium ${
+                stage === 'quiz' ? 'text-clay-700 font-bold bg-clay-50' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Activity className="w-4 h-4" />
+              <span>Perguntas</span>
+            </button>
+
+            <button
+              onClick={() => {
+                if (Object.keys(answers).length >= 4) {
+                  setStage('result');
+                }
+              }}
+              disabled={Object.keys(answers).length < 4 && stage !== 'result'}
+              className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all text-[10px] font-medium ${
+                stage === 'result'
+                  ? 'text-clay-700 font-bold bg-clay-50' 
+                  : Object.keys(answers).length >= 4 
+                    ? 'text-slate-700 hover:text-slate-900' 
+                    : 'text-slate-300 cursor-not-allowed'
+              }`}
+            >
+              <Compass className="w-4 h-4" />
+              <span>Diagnóstico</span>
+            </button>
+
+            <button
+              onClick={handleOpenWhatsapp}
+              className="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-[10px] font-medium text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer"
+            >
+              <MessageCircle className="w-4 h-4 text-emerald-600" />
+              <span>WhatsApp</span>
+            </button>
+          </nav>
+
+        </div>
+      );
+    }
+
+    const container = document.getElementById('root');
+    const root = createRoot(container);
+    root.render(<App />);
+  </script>
+</body>
+</html>
